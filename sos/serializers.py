@@ -126,3 +126,85 @@ class InboundSMSSerializer(serializers.Serializer):
     message = serializers.CharField()
 
 
+class DonationTrackerSerializer(serializers.ModelSerializer):
+    donor_name = serializers.SerializerMethodField()
+    patient_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        from .models import DonationTracker
+        model = DonationTracker
+        fields = [
+            'id',
+            'sos_response',
+            'current_status',
+            'current_latitude',
+            'current_longitude',
+            'estimated_arrival_time',
+            'agreed_at',
+            'traveling_at',
+            'arrived_at',
+            'donating_at',
+            'completed_at',
+            'notes',
+            'updated_at',
+            'donor_name',
+            'patient_name',
+        ]
+        read_only_fields = ['id', 'sos_response', 'agreed_at', 'updated_at']
+    
+    def get_donor_name(self, obj):
+        donor = obj.sos_response.donor
+        donor_details = getattr(donor, 'donor_details', None)
+        return donor_details.full_name if donor_details else donor.username
+    
+    def get_patient_name(self, obj):
+        patient = obj.sos_response.request.requester
+        return patient.get_full_name() or patient.username
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.CharField(source='sender.username', read_only=True)
+    recipient_name = serializers.CharField(source='recipient.username', read_only=True)
+    
+    class Meta:
+        from .models import Message
+        model = Message
+        fields = [
+            'id',
+            'sender',
+            'recipient',
+            'sos_request',
+            'content',
+            'is_template_message',
+            'template_type',
+            'is_read',
+            'read_at',
+            'created_at',
+            'sender_name',
+            'recipient_name',
+        ]
+        read_only_fields = ['id', 'sender', 'is_read', 'read_at', 'created_at']
+
+
+class EmergencyContactSerializer(serializers.ModelSerializer):
+    contact_user_name = serializers.CharField(source='contact_user.username', read_only=True)
+    
+    class Meta:
+        from .models import EmergencyContact
+        model = EmergencyContact
+        fields = [
+            'id',
+            'user',
+            'contact_user',
+            'contact_name',
+            'contact_phone',
+            'contact_email',
+            'relationship',
+            'can_create_sos',
+            'can_view_medical_info',
+            'is_active',
+            'created_at',
+            'contact_user_name',
+        ]
+        read_only_fields = ['id', 'user', 'created_at']
+

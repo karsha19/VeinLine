@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "analyticsapp",
     "appointments",
     "notifications",
+    "drives",
     "webui",
 ]
 

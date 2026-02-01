@@ -35,6 +35,7 @@ urlpatterns = [
     path("api/", include("analyticsapp.urls")),
     path("api/", include("appointments.urls")),
     path("api/", include("notifications.urls")),
+    path("api/", include("drives.urls")),
     # Server-rendered UI
     path("", include("webui.urls")),
 ]

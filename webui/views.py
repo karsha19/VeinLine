@@ -9,7 +9,7 @@ from django.contrib import messages
 
 from accounts.models import Profile
 from donations.models import BloodBankInventory, DonorDetails
-from sos.models import SOSRequest, SOSResponse
+from sos.models import SOSRequest, SOSResponse, DonationTracker, Message
 
 
 class HomeView(TemplateView):
@@ -327,5 +327,110 @@ class AnalyticsView(TemplateView):
         total_responses = SOSResponse.objects.count()
         accepted_responses = SOSResponse.objects.filter(response="accepted").count()
         ctx["response_rate"] = round((accepted_responses / total_responses * 100) if total_responses > 0 else 0, 1)
+        
+        return ctx
+
+
+class PatientSOSDashboardView(RoleRequiredMixin, TemplateView):
+    """Patient SOS management dashboard"""
+    template_name = "dashboards/patient_sos.html"
+    allowed_roles = {"patient"}
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Get all SOS requests by this patient
+        sos_requests = SOSRequest.objects.filter(requester=user).order_by('-created_at')
+        
+        # For each SOS, get responses with tracking info
+        requests_with_responses = []
+        for sos in sos_requests:
+            responses = SOSResponse.objects.filter(request=sos).select_related(
+                'donor', 'donor__donor_details', 'donor__profile'
+            ).order_by('-responded_at')
+            
+            # Get tracking info for each response
+            responses_data = []
+            for resp in responses:
+                tracker = getattr(resp, 'donation_tracker', None)
+                responses_data.append({
+                    'response': resp,
+                    'tracker': tracker,
+                    'donor_details': getattr(resp.donor, 'donor_details', None),
+                    'donor_stats': getattr(resp.donor, 'donor_stats', None),
+                })
+            
+            requests_with_responses.append({
+                'sos': sos,
+                'responses': responses_data,
+                'yes_count': responses.filter(response='yes').count(),
+                'pending_count': responses.filter(response='pending').count(),
+                'total_count': responses.count(),
+            })
+        
+        ctx['requests_with_responses'] = requests_with_responses
+        ctx['total_sos'] = sos_requests.count()
+        ctx['open_sos'] = sos_requests.filter(status='open').count()
+        
+        return ctx
+
+
+class DonorSOSDashboardView(RoleRequiredMixin, TemplateView):
+    """Donor SOS alerts and response dashboard"""
+    template_name = "dashboards/donor_sos.html"
+    allowed_roles = {"donor"}
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user = self.request.user
+        donor_details = getattr(user, 'donor_details', None)
+        
+        # Get active SOS requests in donor's city
+        if donor_details:
+            active_sos = SOSRequest.objects.filter(
+                status='open',
+                city__iexact=donor_details.city
+            ).order_by('-priority', '-created_at')[:20]
+        else:
+            active_sos = SOSRequest.objects.filter(status='open').order_by('-priority', '-created_at')[:20]
+        
+        # Get donor's own responses
+        my_responses = SOSResponse.objects.filter(
+            donor=user
+        ).select_related('request').order_by('-created_at')[:20]
+        
+        # Get responses with tracking
+        responses_with_tracking = []
+        for resp in my_responses:
+            tracker = getattr(resp, 'donation_tracker', None)
+            responses_with_tracking.append({
+                'response': resp,
+                'tracker': tracker,
+            })
+        
+        ctx['active_sos'] = active_sos
+        ctx['my_responses'] = responses_with_tracking
+        ctx['pending_responses'] = my_responses.filter(response='pending').count()
+        ctx['donor_details'] = donor_details
+        
+        return ctx
+
+
+class DrivesView(TemplateView):
+    """Blood donation drives listing"""
+    template_name = "drives.html"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from drives.models import DonationDrive
+        from django.utils import timezone
+        
+        # Get upcoming published drives
+        today = timezone.now().date()
+        ctx['upcoming_drives'] = DonationDrive.objects.filter(
+            start_date__gte=today,
+            status='published'
+        ).order_by('start_date')[:20]
         
         return ctx

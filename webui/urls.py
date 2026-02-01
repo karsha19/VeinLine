@@ -4,7 +4,8 @@ from .views import (
     AboutView, AdminDashboardView, DonorDashboardView, HomeView, LoginView, 
     PatientDashboardView, RegisterView, LeaderboardView, AppointmentsView, 
     BloodBanksView, EligibilityCheckerView, ActivityTimelineView, LogoutViewCustom,
-    PrivacyPolicyView, TermsOfServiceView, ContactView, SupportView, AnalyticsView
+    PrivacyPolicyView, TermsOfServiceView, ContactView, SupportView, AnalyticsView,
+    PatientSOSDashboardView, DonorSOSDashboardView, DrivesView
 )
 
 urlpatterns = [
@@ -26,6 +27,9 @@ urlpatterns = [
     path("dashboard/donor/", DonorDashboardView.as_view(), name="donor-dashboard"),
     path("dashboard/patient/", PatientDashboardView.as_view(), name="patient-dashboard"),
     path("dashboard/admin/", AdminDashboardView.as_view(), name="admin-dashboard"),
+    path("dashboard/patient/sos/", PatientSOSDashboardView.as_view(), name="patient-sos-dashboard"),
+    path("dashboard/donor/sos/", DonorSOSDashboardView.as_view(), name="donor-sos-dashboard"),
+    path("drives/", DrivesView.as_view(), name="drives"),
 ]
 
 
