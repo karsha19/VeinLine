@@ -125,9 +125,21 @@ const badgeIcons = {
   'speed': '⚡'
 };
 
+// Server-side data
+const leaderboardData = (typeof window !== 'undefined' && window.top_donors) ? window.top_donors : {{ top_donors|safe|default:"[]" }};
+const badgesData = (typeof window !== 'undefined' && window.available_badges) ? window.available_badges : {{ available_badges|safe|default:"[]" }};
+
 async function loadLeaderboard(endpoint = 'api/donations/leaderboard/top_donors/') {
   try {
+    // Use server-side data first
+    if (leaderboardData && leaderboardData.length > 0) {
+      renderLeaderboard(leaderboardData);
+      return;
+    }
+    
+    // Fall back to API if needed
     const response = await fetch(`/${endpoint}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     renderLeaderboard(data);
   } catch (error) {
@@ -140,36 +152,39 @@ async function loadLeaderboard(endpoint = 'api/donations/leaderboard/top_donors/
 function renderLeaderboard(donors) {
   const tbody = document.getElementById('leaderboardBody');
   
-  if (donors.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No donors yet</td></tr>';
+  if (!donors || donors.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No donors yet. Be the first to donate!</td></tr>';
     return;
   }
   
   tbody.innerHTML = donors.map((donor, idx) => `
     <tr class="donor-row">
       <td>
-        <span class="rank-medal">${getMedalEmoji(donor.rank)}</span>${donor.rank}
+        <span class="rank-medal">${getMedalEmoji(donor.rank || idx + 1)}</span>${donor.rank || idx + 1}
       </td>
       <td>
-        <strong>${donor.donor_name}</strong><br>
-        <small class="text-muted">${donor.donor_id}</small>
+        <strong>${donor.donor_name || 'Unknown'}</strong><br>
+        <small class="text-muted">ID: ${donor.donor_id || 'N/A'}</small>
       </td>
       <td class="text-center">
         <span class="badge bg-danger">${donor.blood_group || 'N/A'}</span>
       </td>
       <td class="text-center">
-        <strong>${donor.total_donations}</strong>
+        <strong>${donor.total_donations || 0}</strong>
       </td>
       <td class="text-center">
-        <span class="badge bg-warning text-dark">${donor.points} pts</span>
+        <span class="badge bg-warning text-dark">${donor.points || 0} pts</span>
       </td>
       <td class="text-center">
-        ${donor.sos_responses} <small class="text-success">(${Math.round(donor.response_rate)}%)</small>
+        ${donor.sos_responses || 0} <small class="text-success">(${Math.round(donor.response_rate || 0)}%)</small>
       </td>
       <td>
-        ${donor.badges.map(badge => 
-          `<span class="leaderboard-badge" title="${badgeIcons[badge] || '🏅'}">${badgeIcons[badge] || '🏅'}</span>`
-        ).join('')}
+        ${(donor.badges && donor.badges.length > 0) ? 
+          donor.badges.map(badge => 
+            `<span class="leaderboard-badge" title="${badge}">${badgeIcons[badge] || '🏅'}</span>`
+          ).join('') : 
+          '<small class="text-muted">—</small>'
+        }
       </td>
     </tr>
   `).join('');
@@ -177,16 +192,24 @@ function renderLeaderboard(donors) {
 
 function getMedalEmoji(rank) {
   switch(rank) {
-    case 1: return '🥇';
-    case 2: return '🥈';
-    case 3: return '🥉';
+    case 1: return '🥇 ';
+    case 2: return '🥈 ';
+    case 3: return '🥉 ';
     default: return '';
   }
 }
 
 async function loadBadges() {
   try {
+    // Use server-side data first
+    if (badgesData && badgesData.length > 0) {
+      renderBadges(badgesData);
+      return;
+    }
+    
+    // Fall back to API
     const response = await fetch('/api/donations/leaderboard/badges/');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const badges = await response.json();
     renderBadges(badges);
   } catch (error) {
@@ -196,6 +219,11 @@ async function loadBadges() {
 
 function renderBadges(badges) {
   const container = document.getElementById('badgesContainer');
+  if (!badges || badges.length === 0) {
+    container.innerHTML = '<p class="text-muted">No badges available</p>';
+    return;
+  }
+  
   container.innerHTML = badges.map(badge => `
     <div class="col-md-4 col-lg-3">
       <div class="badge-card">

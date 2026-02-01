@@ -785,7 +785,14 @@ img {
 /* Responsive */
 @media (max-width: 768px){
   .section-title{
-    font-size: 2rem;
+    font-size: 2rem; 
+
+
+
+
+
+
+     
   }
   
   .hero{

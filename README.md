@@ -22,6 +22,7 @@ VeinLine is a production-ready (local runnable) blood donation platform with:
 - `veinline_backend/`: Django project settings/urls
 - `accounts/`: user roles + profile
 - `donations/`: donor details + blood bank inventory
+- `appointments/`: appointment slots, booking, health questionnaire
 - `sos/`: SOS requests, responses, matching, SMS inbound webhook
 - `analyticsapp/`: analytics API endpoint
 - `webui/`: server-rendered dashboards
@@ -116,6 +117,81 @@ Body:
   "consent_to_share_contact": true
 }
 ```
+
+### Appointment booking
+
+#### 1. Get available slots (public access, no auth required)
+
+```bash
+GET /api/slots/upcoming/
+GET /api/slots/by_city/?city=Delhi&date=2026-02-15
+```
+
+Response: List of available appointment slots with:
+- `blood_bank`: Name of the blood bank
+- `city`, `address`: Location
+- `date`, `start_time`, `end_time`: Schedule
+- `remaining_slots`: Available spots
+- `is_available_for_booking`: Boolean
+
+#### 2. Book an appointment (authenticated user required)
+
+```bash
+POST /api/my-appointments/
+Authorization: Bearer {access_token}
+
+{
+  "slot_id": 123
+}
+```
+
+Response (201): Appointment object with:
+- `id`: Appointment ID
+- `status`: "scheduled"
+- `slot_details`: Full slot information
+
+#### 3. Submit health questionnaire
+
+```bash
+POST /api/appointments/{appointment_id}/health-questionnaire/
+Authorization: Bearer {access_token}
+
+{
+  "has_fever": false,
+  "has_cold_or_cough": false,
+  "is_pregnant": false,
+  "is_breastfeeding": false,
+  "has_hiv_or_aids": false,
+  "has_hepatitis": false,
+  "has_cancer": false,
+  "has_bleeding_disorder": false,
+  "has_high_blood_pressure": false,
+  "has_diabetes": false,
+  "has_heart_condition": false,
+  "recent_tattoo_or_piercing": false,
+  "recent_surgery": false,
+  "recent_blood_transfusion": false,
+  "recent_vaccination": false,
+  "takes_blood_thinners": false,
+  "takes_antibiotics": false,
+  "weight_kg": 70.5,
+  "hemoglobin_level": 14.2,
+  "additional_notes": "Any relevant medical info"
+}
+```
+
+Response (201): Health questionnaire with:
+- `id`: Questionnaire ID
+- `is_eligible`: true/false based on eligibility criteria
+
+#### 4. Get user's appointments
+
+```bash
+GET /api/my-appointments/
+Authorization: Bearer {access_token}
+```
+
+Response: List of user's booked appointments with full details
 
 ---
 

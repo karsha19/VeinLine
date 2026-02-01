@@ -67,6 +67,8 @@ class RegisterSerializer(serializers.Serializer):
             email=validated_data.get("email", ""),
             password=password,
         )
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        user.save()
         user.profile.role = role
         user.profile.phone_e164 = phone_e164
         user.profile.city = city

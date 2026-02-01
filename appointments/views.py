@@ -14,7 +14,7 @@ class AppointmentSlotViewSet(viewsets.ViewSet):
     """
     API endpoints for appointment slot management and availability
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     def list(self, request):
         """List available appointment slots with filters"""
@@ -77,7 +77,7 @@ class AppointmentViewSet(viewsets.ViewSet):
     """
     API endpoints for appointment booking and management
     """
-    permission_classes = [permissions.IsAuthenticated, IsDonor]
+    permission_classes = [permissions.IsAuthenticated]
     
     def list(self, request):
         """Get donor's own appointments"""
@@ -165,7 +165,7 @@ class HealthQuestionnaireView(APIView):
     """
     Submit and manage health questionnaire for appointment
     """
-    permission_classes = [permissions.IsAuthenticated, IsDonor]
+    permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, appointment_id):
         """Submit health questionnaire"""

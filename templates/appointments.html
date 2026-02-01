@@ -79,87 +79,119 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Health Eligibility Questionnaire</h5>
+        <h5 class="modal-title">Pre-Donation Health Screening Form</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
         <form id="healthForm">
-          <div class="mb-3">
-            <label class="form-label">Weight (kg)</label>
-            <input type="number" class="form-control" id="weight_kg" min="50" step="0.1" required>
+          <div class="alert alert-info mb-3">
+            <small><strong>Important:</strong> Please answer all questions honestly. Your responses are confidential and essential for donor and recipient safety.</small>
           </div>
 
-          <h6 class="fw-bold mb-3">Current Health Status</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Body Weight <span class="text-danger">*</span> <span class="text-muted">(kg)</span></label>
+              <input type="number" class="form-control" id="weight_kg" min="50" step="0.1" placeholder="e.g., 70" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Hemoglobin Level <span class="text-muted">(g/dL)</span></label>
+              <input type="number" class="form-control" id="hemoglobin_level" min="7" max="20" step="0.1" placeholder="e.g., 14.5">
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-3 text-danger">General Health Screening</h6>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="has_fever" name="has_fever">
-            <label class="form-check-label" for="has_fever">Do you have fever or body temperature above 37.5°C?</label>
+            <label class="form-check-label" for="has_fever">Do you currently have fever, chills, or body temperature above 37.5°C?</label>
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="has_cold_or_cough" name="has_cold_or_cough">
-            <label class="form-check-label" for="has_cold_or_cough">Do you have cold, cough, or sore throat?</label>
+            <label class="form-check-label" for="has_cold_or_cough">Are you experiencing symptoms of respiratory infection (cough, sore throat, nasal congestion)?</label>
           </div>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="is_pregnant" name="is_pregnant">
-            <label class="form-check-label" for="is_pregnant">Are you pregnant?</label>
+            <input class="form-check-input" type="checkbox" id="has_heart_condition" name="has_heart_condition">
+            <label class="form-check-label" for="has_heart_condition">Have you been diagnosed with cardiovascular disease, heart murmur, or arrhythmia?</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="has_high_blood_pressure" name="has_high_blood_pressure">
+            <label class="form-check-label" for="has_high_blood_pressure">Do you have chronic uncontrolled hypertension (systolic >180 mmHg or diastolic >110 mmHg)?</label>
           </div>
           <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="is_breastfeeding" name="is_breastfeeding">
-            <label class="form-check-label" for="is_breastfeeding">Are you currently breastfeeding?</label>
+            <input class="form-check-input" type="checkbox" id="has_diabetes" name="has_diabetes">
+            <label class="form-check-label" for="has_diabetes">Do you have Type 1 or Type 2 diabetes requiring insulin treatment?</label>
           </div>
 
-          <h6 class="fw-bold mb-3">Medical History</h6>
+          <h6 class="fw-bold mb-3 text-danger">Infectious Disease Screening</h6>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="has_hiv_or_aids" name="has_hiv_or_aids">
-            <label class="form-check-label" for="has_hiv_or_aids">Do you have HIV/AIDS?</label>
+            <label class="form-check-label" for="has_hiv_or_aids">Have you been diagnosed with HIV infection, AIDS, or exposed to HIV?</label>
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="has_hepatitis" name="has_hepatitis">
-            <label class="form-check-label" for="has_hepatitis">Do you have Hepatitis?</label>
+            <label class="form-check-label" for="has_hepatitis">Have you been diagnosed with Hepatitis B, Hepatitis C, or other forms of hepatitis?</label>
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="has_cancer" name="has_cancer">
-            <label class="form-check-label" for="has_cancer">Do you have or have had cancer?</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="has_bleeding_disorder" name="has_bleeding_disorder">
-            <label class="form-check-label" for="has_bleeding_disorder">Do you have a bleeding disorder?</label>
+            <label class="form-check-label" for="has_cancer">Have you been diagnosed with or treated for malignancy, lymphoma, or leukemia?</label>
           </div>
           <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="has_high_blood_pressure" name="has_high_blood_pressure">
-            <label class="form-check-label" for="has_high_blood_pressure">Do you have high blood pressure (uncontrolled)?</label>
+            <input class="form-check-input" type="checkbox" id="has_bleeding_disorder" name="has_bleeding_disorder">
+            <label class="form-check-label" for="has_bleeding_disorder">Have you been diagnosed with a bleeding disorder, hemophilia, or thrombocytopenia?</label>
           </div>
 
-          <h6 class="fw-bold mb-3">Recent Medical Events</h6>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="recent_tattoo_or_piercing" name="recent_tattoo_or_piercing">
-            <label class="form-check-label" for="recent_tattoo_or_piercing">Have you had a tattoo or body piercing in the last 3 months?</label>
-          </div>
+          <h6 class="fw-bold mb-3 text-danger">Recent Medical Procedures & Events</h6>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="recent_surgery" name="recent_surgery">
-            <label class="form-check-label" for="recent_surgery">Have you had surgery in the last 6 months?</label>
+            <label class="form-check-label" for="recent_surgery">Have you undergone surgery, dental extraction, or invasive procedure within the last 6 months?</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="recent_tattoo_or_piercing" name="recent_tattoo_or_piercing">
+            <label class="form-check-label" for="recent_tattoo_or_piercing">Have you received a tattoo, body piercing, or acupuncture within the last 12 months?</label>
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="recent_blood_transfusion" name="recent_blood_transfusion">
-            <label class="form-check-label" for="recent_blood_transfusion">Have you received a blood transfusion in the last 1 year?</label>
+            <label class="form-check-label" for="recent_blood_transfusion">Have you received a blood transfusion or blood product within the last 12 months?</label>
           </div>
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="recent_vaccination" name="recent_vaccination">
-            <label class="form-check-label" for="recent_vaccination">Have you received any vaccination in the last 2 weeks?</label>
-          </div>
-
-          <h6 class="fw-bold mb-3">Medications</h6>
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="takes_blood_thinners" name="takes_blood_thinners">
-            <label class="form-check-label" for="takes_blood_thinners">Are you taking blood thinners (Aspirin, Warfarin, etc.)?</label>
+            <input class="form-check-input" type="checkbox" id="recent_vaccination" name="recent_vaccination">
+            <label class="form-check-label" for="recent_vaccination">Have you received live attenuated vaccine (MMR, varicella, yellow fever) within the last 4 weeks?</label>
           </div>
           <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" id="takes_antibiotics" name="takes_antibiotics">
-            <label class="form-check-label" for="takes_antibiotics">Are you currently taking antibiotics?</label>
+            <label class="form-check-label" for="takes_antibiotics">Are you currently taking antibiotics or antifungal medications?</label>
+          </div>
+
+          <h6 class="fw-bold mb-3 text-danger">Medication & Anticoagulation</h6>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="takes_blood_thinners" name="takes_blood_thinners">
+            <label class="form-check-label" for="takes_blood_thinners">Are you taking anticoagulant therapy (Warfarin, DOACs) or high-dose antiplatelet agents?</label>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="has_high_blood_pressure" name="has_high_blood_pressure">
+            <label class="form-check-label" for="has_high_blood_pressure">Have you had any adverse reactions to medications or blood products previously?</label>
+          </div>
+
+          <h6 class="fw-bold mb-3 text-danger">Special Considerations</h6>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="is_pregnant" name="is_pregnant">
+            <label class="form-check-label" for="is_pregnant">Are you currently pregnant or have you given birth within the last 6 months?</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="is_breastfeeding" name="is_breastfeeding">
+            <label class="form-check-label" for="is_breastfeeding">Are you currently lactating or breastfeeding?</label>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="has_bleeding_disorder" name="has_bleeding_disorder">
+            <label class="form-check-label" for="has_bleeding_disorder">Do you have any history of fainting, syncope, or severe needle-related anxiety?</label>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Additional Notes (optional)</label>
-            <textarea class="form-control" id="additional_notes" rows="3"></textarea>
+            <label class="form-label">Additional Medical Information <span class="text-muted">(optional)</span></label>
+            <textarea class="form-control" id="additional_notes" rows="3" placeholder="Include any relevant medical conditions, medications, or concerns not mentioned above. This information is confidential and used solely for health screening purposes."></textarea>
+          </div>
+
+          <div class="alert alert-warning mt-3 mb-0">
+            <small><strong>Certification:</strong> I hereby certify that the information provided above is accurate and complete to the best of my knowledge.</small>
           </div>
         </form>
       </div>
@@ -202,6 +234,7 @@
 </style>
 
 <script>
+{% csrf_token %}
 let selectedSlotId = null;
 let selectedAppointmentId = null;
 const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
@@ -210,8 +243,12 @@ const healthModal = new bootstrap.Modal(document.getElementById('healthModal'));
 async function loadAllSlots() {
   try {
     const response = await fetch('/api/slots/upcoming/');
-    if (!response.ok) throw new Error('Failed to load slots');
+    if (!response.ok) {
+      console.error('API Response:', response.status, response.statusText);
+      throw new Error('Failed to load slots');
+    }
     const slots = await response.json();
+    console.log('Loaded slots:', slots.length);
     renderSlots(slots);
   } catch (error) {
     console.error('Error loading slots:', error);
@@ -317,10 +354,13 @@ async function confirmBooking() {
     if (response.ok) {
       const appointment = await response.json();
       selectedAppointmentId = appointment.id;
+      console.log('Appointment created:', appointment);
       bookingModal.hide();
       healthModal.show();
     } else {
-      alert('Error booking appointment');
+      const errorData = await response.json();
+      console.error('Booking error:', errorData);
+      alert('Error booking appointment: ' + (errorData.detail || JSON.stringify(errorData)));
     }
   } catch (error) {
     console.error('Error:', error);
@@ -329,15 +369,24 @@ async function confirmBooking() {
 }
 
 async function submitHealthForm() {
-  const formData = new FormData(document.getElementById('healthForm'));
-  const data = Object.fromEntries(formData);
+  const form = document.getElementById('healthForm');
+  const data = {};
   
-  // Convert boolean strings
-  Object.keys(data).forEach(key => {
-    if (key.startsWith('has_') || key.startsWith('recent_') || key.startsWith('takes_') || key.startsWith('is_')) {
-      data[key] = data[key] === 'on';
+  // Get all form fields
+  const inputs = form.querySelectorAll('input, textarea, select');
+  
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') {
+      // Handle checkboxes - unchecked means false
+      data[input.name] = input.checked;
+    } else if (input.type === 'number' && input.value) {
+      data[input.name] = parseFloat(input.value);
+    } else if (input.value) {
+      data[input.name] = input.value;
     }
   });
+  
+  console.log('Health Form Data:', data);
   
   try {
     const response = await fetch(`/api/appointments/${selectedAppointmentId}/health-questionnaire/`, {
@@ -355,7 +404,9 @@ async function submitHealthForm() {
       loadMyAppointments();
       loadAllSlots();
     } else {
-      alert('Error submitting health form');
+      const errorData = await response.json();
+      console.error('Server error:', errorData);
+      alert('Error submitting health form: ' + JSON.stringify(errorData));
     }
   } catch (error) {
     console.error('Error:', error);
@@ -366,7 +417,13 @@ async function submitHealthForm() {
 async function loadMyAppointments() {
   try {
     const response = await fetch('/api/my-appointments/');
-    if (!response.ok) throw new Error('Failed to load appointments');
+    if (!response.ok) {
+      if (response.status === 401) {
+        document.getElementById('myAppointments').innerHTML = '<p class="text-info">Please <a href="/login/">log in</a> to view your appointments.</p>';
+        return;
+      }
+      throw new Error('Failed to load appointments');
+    }
     const appointments = await response.json();
     renderMyAppointments(appointments);
   } catch (error) {
