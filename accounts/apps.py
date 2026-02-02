@@ -7,3 +7,4 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         import accounts.signals  # noqa
+        import django_py314_patch  # noqa - Fix for Django 5.1.6 + Python 3.14 Context.__copy__ bug

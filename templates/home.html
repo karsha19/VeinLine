@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load auth_filters %}
 
 {% block title %}VeinLine — Blood Donation Platform{% endblock %}
 
@@ -40,30 +41,17 @@
       <div class="d-flex gap-3 flex-wrap mb-4" style="position: relative; z-index: 2;">
         {% if user.is_authenticated %}
           {% if user.is_staff %}
-            <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/admin/">
-              📊 Admin Dashboard
-            </a>
-          {% else %}
-            {% if user.profile.role == 'donor' %}
-              <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/donor/">
-                💉 Donor Dashboard
-              </a>
-            {% elif user.profile.role == 'patient' %}
-              <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/patient/">
-                🏥 Patient Dashboard
-              </a>
-            {% endif %}
+            <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/admin/">📊 Admin Dashboard</a>
+          {% elif user|safe_profile_role == 'donor' %}
+            <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/donor/">💉 Donor Dashboard</a>
+          {% elif user|safe_profile_role == 'patient' %}
+            <a class="btn btn-light btn-lg px-5 fw-bold" href="/dashboard/patient/">🏥 Patient Dashboard</a>
           {% endif %}
-          <a class="btn btn-outline-light btn-lg px-5 fw-bold" href="{% url 'logout' %}">
-            Logout
-          </a>
+
+          <a class="btn btn-outline-light btn-lg px-5 fw-bold" href="{% url 'logout' %}">Logout</a>
         {% else %}
-          <a class="btn btn-light btn-lg px-5 fw-bold" href="{% url 'register' %}">
-            Get Started Free
-          </a>
-          <a class="btn btn-outline-light btn-lg px-5 fw-bold" href="{% url 'login' %}">
-            Sign In
-          </a>
+          <a class="btn btn-light btn-lg px-5 fw-bold" href="{% url 'register' %}">Get Started Free</a>
+          <a class="btn btn-outline-light btn-lg px-5 fw-bold" href="{% url 'login' %}">Sign In</a>
         {% endif %}
       </div>
 

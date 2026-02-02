@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import AboutView, AdminDashboardView, DonorDashboardView, HomeView, LoginView, PatientDashboardView, RegisterView, LeaderboardView, AppointmentsView, BloodBanksView, EligibilityCheckerView, ActivityTimelineView, LogoutViewCustom
+from .views import (
+    AboutView, AdminDashboardView, DonorDashboardView, HomeView, LoginView, 
+    PatientDashboardView, RegisterView, LeaderboardView, AppointmentsView, 
+    BloodBanksView, EligibilityCheckerView, ActivityTimelineView, LogoutViewCustom,
+    CreateSOSView
+)
 
 urlpatterns = [
     path("", HomeView.as_view(), name="home"),
@@ -16,6 +21,7 @@ urlpatterns = [
     path("dashboard/donor/", DonorDashboardView.as_view(), name="donor-dashboard"),
     path("dashboard/patient/", PatientDashboardView.as_view(), name="patient-dashboard"),
     path("dashboard/admin/", AdminDashboardView.as_view(), name="admin-dashboard"),
+    path("sos/create/", CreateSOSView.as_view(), name="create_sos"),
 ]
 
 

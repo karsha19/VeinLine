@@ -14,7 +14,8 @@ class AppointmentSlotViewSet(viewsets.ViewSet):
     """
     API endpoints for appointment slot management and availability
     """
-    permission_classes = [permissions.IsAuthenticated]
+    # Allow public read access to view available slots (anonymous users should be able to browse)
+    permission_classes = [permissions.AllowAny]
     
     def list(self, request):
         """List available appointment slots with filters"""

@@ -6,10 +6,17 @@ from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from django.views import View
 from django.contrib import messages
+from django.db import transaction
+import logging
 
 from accounts.models import Profile
 from donations.models import BloodBankInventory, DonorDetails
-from sos.models import SOSRequest, SOSResponse
+from sos.models import SOSRequest, SOSResponse, SOSStatus, SOSPriority
+from sos.services import match_donors_for_request
+from core.services.sms import send_sms
+from core.services.emailing import send_fallback_email
+
+logger = logging.getLogger(__name__)
 
 
 class HomeView(TemplateView):
@@ -110,8 +117,8 @@ class RegisterView(View):
                     profile.phone_e164 = phone
                 profile.save()
             
-            # Auto-login
-            login(request, user)
+            # Auto-login (specify backend because multiple auth backends are configured)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Welcome to VeinLine, {user.username}! Your account has been created successfully.")
             return redirect("home")
         except Exception as e:
@@ -194,6 +201,155 @@ class AdminDashboardView(LoginRequiredMixin, TemplateView):
         )
         ctx["inventory"] = BloodBankInventory.objects.all().order_by("city", "blood_group")[:50]
         return ctx
+
+
+class CreateSOSView(RoleRequiredMixin, TemplateView):
+    """Create emergency SOS request"""
+    template_name = "create_sos.html"
+    allowed_roles = {"patient"}
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Handle SOS creation from form"""
+        try:
+            blood_group = request.POST.get('blood_group_needed', '').strip()
+            units = int(request.POST.get('units_needed', 1))
+            city = request.POST.get('city', '').strip()
+            area = request.POST.get('area', '').strip()
+            hospital = request.POST.get('hospital_name', '').strip()
+            message = request.POST.get('message', '').strip()
+            priority = request.POST.get('priority', SOSPriority.NORMAL)
+
+            # Validation
+            if not blood_group:
+                messages.error(request, "Blood group is required.")
+                return render(request, self.template_name)
+            
+            if not city:
+                messages.error(request, "City is required.")
+                return render(request, self.template_name)
+
+            if units < 1 or units > 10:
+                messages.error(request, "Units must be between 1 and 10.")
+                return render(request, self.template_name)
+
+            if priority not in dict(SOSPriority.choices):
+                priority = SOSPriority.NORMAL
+
+            # Create SOS request
+            sos_request = SOSRequest.objects.create(
+                requester=request.user,
+                blood_group_needed=blood_group,
+                units_needed=units,
+                city=city,
+                area=area,
+                hospital_name=hospital,
+                message=message,
+                status=SOSStatus.OPEN,
+                priority=priority,
+            )
+
+            messages.success(
+                request,
+                f"🚨 SOS Request #{sos_request.id} created successfully! "
+                f"Looking for matching {blood_group} donors in {city}..."
+            )
+
+            # Find and notify matching donors
+            try:
+                logger.info(f"[SOS #{sos_request.id}] Starting donor matching for {blood_group} in {city}")
+                
+                donors = match_donors_for_request(sos_request, limit=50)
+                donors_list = list(donors)
+                
+                logger.info(f"[SOS #{sos_request.id}] Found {len(donors_list)} matching donors")
+                
+                if donors_list:
+                    # Send SMS to each donor
+                    sms_message = (
+                        f"VeinLine SOS: Need {sos_request.blood_group_needed} blood in {sos_request.city}. "
+                        f"Reply: YES {sos_request.sms_reply_token} or NO {sos_request.sms_reply_token}."
+                    )
+
+                    notified_count = 0
+                    failed_count = 0
+                    no_phone_count = 0
+                    
+                    with transaction.atomic():
+                        for donor in donors_list:
+                            donor_name = donor.user.username
+                            
+                            # Create response record
+                            SOSResponse.objects.get_or_create(
+                                request=sos_request,
+                                donor=donor.user,
+                                defaults={'response': 'pending', 'channel': 'sms'}
+                            )
+
+                            # Send SMS
+                            phone = getattr(getattr(donor.user, 'profile', None), 'phone_e164', '')
+                            if phone:
+                                try:
+                                    logger.info(f"[SOS #{sos_request.id}] Sending SMS to {donor_name} ({phone})")
+                                    result = send_sms(phone, sms_message)
+                                    
+                                    if result.get('ok'):
+                                        logger.info(f"[SOS #{sos_request.id}] ✓ SMS sent to {donor_name}")
+                                        notified_count += 1
+                                    else:
+                                        logger.warning(f"[SOS #{sos_request.id}] ✗ SMS failed for {donor_name}: {result.get('reason')}")
+                                        failed_count += 1
+                                except Exception as e:
+                                    logger.error(f"[SOS #{sos_request.id}] Error sending SMS to {donor_name}: {str(e)}")
+                                    failed_count += 1
+                            else:
+                                logger.warning(f"[SOS #{sos_request.id}] Donor {donor_name} has no phone number")
+                                no_phone_count += 1
+
+                            # Email fallback
+                            try:
+                                send_fallback_email(
+                                    to_email=getattr(donor.user, 'email', ''),
+                                    subject="VeinLine SOS Alert",
+                                    message=sms_message,
+                                )
+                            except Exception as e:
+                                logger.warning(f"[SOS #{sos_request.id}] Error sending email to {donor.user.email}: {str(e)}")
+
+                    summary = f"✅ Found {len(donors_list)} matching donors. "
+                    if notified_count > 0:
+                        summary += f"Notifications sent to {notified_count}"
+                    if no_phone_count > 0:
+                        summary += f" ({no_phone_count} donors missing phone)"
+                    if failed_count > 0:
+                        summary += f" ({failed_count} SMS failures)"
+                    
+                    logger.info(f"[SOS #{sos_request.id}] Summary: {summary}")
+                    messages.success(request, summary)
+                else:
+                    logger.warning(f"[SOS #{sos_request.id}] No matching donors found for {blood_group} in {city}")
+                    messages.warning(
+                        request,
+                        f"⚠️ No matching donors found in {city} with {blood_group} blood group. "
+                        "Check the status regularly - more donors may become available."
+                    )
+
+            except Exception as e:
+                logger.error(f"[SOS #{sos_request.id}] Error during donor notification: {str(e)}", exc_info=True)
+                messages.warning(
+                    request,
+                    f"SOS created (#{sos_request.id}), but error notifying donors: {str(e)}"
+                )
+
+            # Redirect to patient dashboard
+            return redirect('patient-dashboard')
+
+        except Exception as e:
+            messages.error(request, f"Error creating SOS: {str(e)}")
+            return render(request, self.template_name)
+
 
 class LeaderboardView(TemplateView):
     """Public leaderboard view for donors"""

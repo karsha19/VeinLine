@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 
 from django.contrib.auth import get_user_model
@@ -23,6 +24,7 @@ from .serializers import (
 from .services import match_donors_for_request
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def _normalize_phone(phone: str) -> str:
@@ -83,6 +85,8 @@ class SOSRequestViewSet(viewsets.ModelViewSet):
         donors = match_donors_for_request(sos_req, limit=50)
 
         notified = []
+        sms_results = []
+        
         with transaction.atomic():
             for d in donors:
                 resp, created = SOSResponse.objects.get_or_create(
@@ -92,32 +96,62 @@ class SOSRequestViewSet(viewsets.ModelViewSet):
                 )
                 notified.append({"donor_id": d.user_id, "created": created, "response_id": resp.id})
 
-        # Notification message includes token for SMS reply.
-        sms_message = (
-            f"VeinLine SOS: Need {sos_req.blood_group_needed} blood in {sos_req.city}. "
-            f"Reply: YES {sos_req.sms_reply_token} or NO {sos_req.sms_reply_token}."
-            f" (Optional consent: YES SHARE {sos_req.sms_reply_token})"
-        )
+                # Notification message includes token for SMS reply.
+                sms_message = (
+                    f"VeinLine SOS: Need {sos_req.blood_group_needed} blood in {sos_req.city}. "
+                    f"Reply: YES {sos_req.sms_reply_token} or NO {sos_req.sms_reply_token}."
+                    f" (Optional consent: YES SHARE {sos_req.sms_reply_token})"
+                )
 
-        sms_results = []
-        for d in donors:
-            phone = getattr(getattr(d.user, "profile", None), "phone_e164", "")
-            if phone:
-                sms_results.append({"donor_id": d.user_id, "sms": send_sms(phone, sms_message)})
-            # Email fallback (if donor has email)
-            send_fallback_email(
-                to_email=getattr(d.user, "email", ""),
-                subject="VeinLine SOS Alert",
-                message=sms_message,
-            )
+                # Get donor phone number
+                phone = getattr(getattr(d.user, "profile", None), "phone_e164", "")
+                if phone:
+                    try:
+                        sms_result = send_sms(phone, sms_message)
+                        sms_results.append({
+                            "donor_id": d.user_id,
+                            "donor_name": d.full_name,
+                            "phone": phone,
+                            "sms": sms_result
+                        })
+                        # Log SMS sending
+                        logger.info(f"SMS sent to donor {d.user_id} ({phone}) for SOS request {sos_req.id}")
+                    except Exception as e:
+                        logger.error(f"Failed to send SMS to donor {d.user_id}: {str(e)}")
+                        sms_results.append({
+                            "donor_id": d.user_id,
+                            "donor_name": d.full_name,
+                            "phone": phone,
+                            "error": str(e)
+                        })
+                else:
+                    logger.warning(f"No phone number for donor {d.user_id} ({d.full_name})")
+                    sms_results.append({
+                        "donor_id": d.user_id,
+                        "donor_name": d.full_name,
+                        "phone": None,
+                        "skipped": "No phone number"
+                    })
+
+                # Email fallback (if donor has email)
+                try:
+                    send_fallback_email(
+                        to_email=getattr(d.user, "email", ""),
+                        subject="VeinLine SOS Alert",
+                        message=sms_message,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send email to donor {d.user_id}: {str(e)}")
 
         return Response(
             {
                 "request_id": sos_req.id,
-                "matched_donors": donors.count() if hasattr(donors, "count") else len(donors),
+                "matched_donors": len(donors) if hasattr(donors, "__len__") else donors.count(),
                 "responses_created_or_found": notified,
                 "sms_results": sms_results,
-            }
+                "message": f"SOS notification sent to {len(sms_results)} donors"
+            },
+            status=status.HTTP_200_OK
         )
 
 

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     {% load static %}
+    {% load auth_filters %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}VeinLine{% endblock %}</title>
@@ -54,10 +55,10 @@
                   {% if user.is_staff %}
                     <li><a class="dropdown-item" href="/dashboard/admin/">📊 Admin Dashboard</a></li>
                   {% else %}
-                    {% if user.profile.role == 'donor' %}
+                    {% if user|safe_profile_role == 'donor' %}
                       <li><a class="dropdown-item" href="/dashboard/donor/">💉 Donor Dashboard</a></li>
                     {% endif %}
-                    {% if user.profile.role == 'patient' %}
+                    {% if user|safe_profile_role == 'patient' %}
                       <li><a class="dropdown-item" href="/dashboard/patient/">🏥 Patient Dashboard</a></li>
                     {% endif %}
                   {% endif %}

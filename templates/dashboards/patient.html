@@ -10,7 +10,12 @@
     </h2>
     <div class="text-muted">Create SOS requests and track donor responses.</div>
   </div>
-  <a class="btn btn-outline-danger" href="/admin/">Admin</a>
+  <div>
+    <a class="btn btn-danger fw-bold me-2" href="/sos/create/">
+      <span style="font-size: 1.2rem;">🚨</span> Create Emergency SOS
+    </a>
+    <a class="btn btn-outline-dark" href="/admin/">Admin</a>
+  </div>
 </div>
 
 <div class="row g-4 mb-4">
@@ -39,17 +44,16 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card stat-card rounded-4 shadow-sm">
+    <div class="card stat-card rounded-4 shadow-sm bg-danger bg-opacity-10">
       <div class="card-body p-4">
         <div class="d-flex align-items-center justify-content-between mb-2">
-          <div class="text-muted small fw-semibold">Quick Action</div>
+          <div class="text-muted small fw-semibold">Quick Create</div>
           <div class="icon-wrapper" style="width: 40px; height: 40px; font-size: 20px;">⚡</div>
         </div>
-        <div class="fw-semibold mb-2">Create SOS via API</div>
-        <div class="small text-muted">
-          <code class="small">POST /api/sos/requests/</code><br>
-          <code class="small">POST /api/sos/requests/{id}/match/</code>
-        </div>
+        <div class="fw-semibold mb-2 text-danger">Emergency SOS</div>
+        <a href="/sos/create/" class="small text-danger fw-bold text-decoration-none">
+          Create now →
+        </a>
       </div>
     </div>
   </div>
@@ -96,7 +100,7 @@
             <tr>
               <td colspan="5" class="text-center text-muted py-5">
                 <div class="mb-2" style="font-size: 3rem;">📝</div>
-                <div>No SOS requests yet. Create one via the API to get started.</div>
+                <div>No SOS requests yet. <a href="/sos/create/" class="text-danger fw-bold">Create one now →</a></div>
               </td>
             </tr>
           {% endfor %}
