@@ -243,93 +243,93 @@
 const questions = [
   {
     id: 'has_fever',
-    question: 'Do you have fever or body temperature above 37.5°C?',
+    question: 'Do you currently have fever, chills, or body temperature above 37.5°C?',
     disqualifies: true,
-    category: 'Current Health'
+    category: 'General Health'
   },
   {
     id: 'has_cold_or_cough',
-    question: 'Do you have cold, cough, or sore throat?',
+    question: 'Are you experiencing symptoms of respiratory infection (cough, sore throat, nasal congestion)?',
     disqualifies: true,
-    category: 'Current Health'
+    category: 'General Health'
   },
   {
-    id: 'is_pregnant',
-    question: 'Are you pregnant?',
+    id: 'has_heart_condition',
+    question: 'Have you been diagnosed with cardiovascular disease, heart murmur, or arrhythmia?',
     disqualifies: true,
-    category: 'Current Health'
-  },
-  {
-    id: 'is_breastfeeding',
-    question: 'Are you currently breastfeeding?',
-    disqualifies: true,
-    category: 'Current Health'
-  },
-  {
-    id: 'has_hiv_or_aids',
-    question: 'Do you have HIV/AIDS?',
-    disqualifies: true,
-    category: 'Medical History'
-  },
-  {
-    id: 'has_hepatitis',
-    question: 'Do you have Hepatitis?',
-    disqualifies: true,
-    category: 'Medical History'
-  },
-  {
-    id: 'has_cancer',
-    question: 'Do you have or have had cancer?',
-    disqualifies: true,
-    category: 'Medical History'
-  },
-  {
-    id: 'has_bleeding_disorder',
-    question: 'Do you have a bleeding disorder?',
-    disqualifies: true,
-    category: 'Medical History'
-  },
-  {
-    id: 'has_high_blood_pressure',
-    question: 'Do you have high blood pressure (uncontrolled)?',
-    disqualifies: false,
     category: 'Medical Conditions'
   },
   {
-    id: 'recent_tattoo_or_piercing',
-    question: 'Have you had a tattoo or body piercing in the last 3 months?',
+    id: 'has_high_blood_pressure',
+    question: 'Do you have chronic uncontrolled hypertension (systolic >180 mmHg or diastolic >110 mmHg)?',
     disqualifies: true,
-    category: 'Recent Events'
+    category: 'Medical Conditions'
+  },
+  {
+    id: 'has_diabetes',
+    question: 'Do you have Type 1 or Type 2 diabetes requiring insulin treatment?',
+    disqualifies: true,
+    category: 'Medical Conditions'
+  },
+  {
+    id: 'has_hiv_or_aids',
+    question: 'Have you been diagnosed with HIV infection, AIDS, or exposed to HIV?',
+    disqualifies: true,
+    category: 'Infectious Disease'
+  },
+  {
+    id: 'has_hepatitis',
+    question: 'Have you been diagnosed with Hepatitis B, Hepatitis C, or other forms of hepatitis?',
+    disqualifies: true,
+    category: 'Infectious Disease'
+  },
+  {
+    id: 'has_cancer',
+    question: 'Have you been diagnosed with or treated for malignancy, lymphoma, or leukemia?',
+    disqualifies: true,
+    category: 'Infectious Disease'
+  },
+  {
+    id: 'has_bleeding_disorder',
+    question: 'Have you been diagnosed with a bleeding disorder, hemophilia, or thrombocytopenia?',
+    disqualifies: true,
+    category: 'Infectious Disease'
   },
   {
     id: 'recent_surgery',
-    question: 'Have you had surgery in the last 6 months?',
+    question: 'Have you undergone surgery, dental extraction, or invasive procedure within the last 6 months?',
     disqualifies: true,
-    category: 'Recent Events'
+    category: 'Recent Medical Events'
+  },
+  {
+    id: 'recent_tattoo_or_piercing',
+    question: 'Have you received a tattoo, body piercing, or acupuncture within the last 12 months?',
+    disqualifies: true,
+    category: 'Recent Medical Events'
   },
   {
     id: 'recent_blood_transfusion',
-    question: 'Have you received a blood transfusion in the last 1 year?',
+    question: 'Have you received a blood transfusion or blood product within the last 12 months?',
     disqualifies: true,
-    category: 'Recent Events'
+    category: 'Recent Medical Events'
   },
   {
     id: 'recent_vaccination',
-    question: 'Have you received any vaccination in the last 2 weeks?',
-    disqualifies: false,
-    category: 'Recent Events'
+    question: 'Have you received live attenuated vaccine (MMR, varicella, yellow fever) within the last 4 weeks?',
+    disqualifies: true,
+    category: 'Recent Medical Events'
   },
   {
     id: 'takes_blood_thinners',
-    question: 'Are you taking blood thinners (Aspirin, Warfarin, etc.)?',
+    question: 'Are you taking anticoagulant therapy (Warfarin, DOACs) or high-dose antiplatelet agents?',
     disqualifies: false,
     category: 'Medications'
   },
   {
-    id: 'takes_antibiotics',
-    question: 'Are you currently taking antibiotics?',
-    disqualifies: false,
-    category: 'Medications'
+    id: 'is_pregnant',
+    question: 'Are you currently pregnant or have you given birth within the last 6 months?',
+    disqualifies: true,
+    category: 'Special Considerations'
   }
 ];
 

@@ -95,7 +95,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'donor',
-            'slot',
             'slot_id',
             'slot_details',
             'status',
